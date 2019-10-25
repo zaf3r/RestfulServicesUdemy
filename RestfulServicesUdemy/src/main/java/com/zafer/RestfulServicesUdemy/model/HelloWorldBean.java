@@ -1,4 +1,4 @@
-package com.zafer.RestfulServicesUdemy;
+package com.zafer.RestfulServicesUdemy.model;
 
 public class HelloWorldBean {
 
