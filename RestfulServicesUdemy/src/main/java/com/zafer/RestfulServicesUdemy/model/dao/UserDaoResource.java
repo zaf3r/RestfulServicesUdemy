@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,11 +21,11 @@ public class UserDaoResource {
 
     private static int userCount = 3;
 
-    public List<User> getUsers() {
+    public static List<User> getUsers() {
         return users;
     }
 
-    public void setUsers(List<User> users) {
+    public static void setUsers(List<User> users) {
         UserDaoResource.users = users;
     }
 
@@ -39,6 +40,18 @@ public class UserDaoResource {
     public Optional<User> findUser(int userId){
         for(User user : users) {
             if(user.getId()==userId){
+                return Optional.of(user);
+            }
+        }
+        return Optional.empty();
+    }
+
+    public Optional<User> deleteUser(int userId){
+        Iterator<User> userIterator = users.iterator();
+        while(userIterator.hasNext()) {
+            User user = userIterator.next();
+            if(user.getId() == userId) {
+                userIterator.remove();
                 return Optional.of(user);
             }
         }

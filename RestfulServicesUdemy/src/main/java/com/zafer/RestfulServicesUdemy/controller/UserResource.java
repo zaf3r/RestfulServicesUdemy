@@ -4,10 +4,14 @@ import com.zafer.RestfulServicesUdemy.Exception.UserNotFoundException;
 import com.zafer.RestfulServicesUdemy.model.User;
 import com.zafer.RestfulServicesUdemy.model.dao.UserDaoResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
@@ -24,13 +28,21 @@ public class UserResource {
     }
 
     @GetMapping("/user/{userId}")
-    public User findUser(@PathVariable int userId) {
+    public EntityModel<User> findUser(@PathVariable int userId) {
         Optional<User> user = service.findUser(userId);
-        return user.orElseThrow( () -> new UserNotFoundException("userId "+userId));
+
+        if(!user.isPresent()) {
+            throw new UserNotFoundException("userId "+userId);
+        } else {
+            EntityModel<User> userEntityModel = new EntityModel<>(user.get());
+            WebMvcLinkBuilder linkTo = linkTo(methodOn(this.getClass()).findAllUsers());
+            userEntityModel.add(linkTo.withRel("all-users"));
+            return userEntityModel;
+        }
     }
 
     @PostMapping("/user")
-    public ResponseEntity<Object> createUser(@RequestBody User user){
+    public ResponseEntity<Object> createUser(@Valid @RequestBody User user){
         User savedUser = service.save(user);
 
         URI location = ServletUriComponentsBuilder
@@ -39,6 +51,15 @@ public class UserResource {
                 .buildAndExpand(user.getId())
                 .toUri();
         return ResponseEntity.created(location).build();
+    }
+
+    @DeleteMapping("/user/{userId}")
+    public void deleteUser(@PathVariable int userId) {
+        System.out.println();
+        Optional<User> user = service.deleteUser(userId);
+        if(!user.isPresent()) {
+            throw new UserNotFoundException("userId "+userId);
+        }
     }
 
     //CREATED
